@@ -33,8 +33,9 @@ namespace Flann
         }
 
         /// <summary>
-        /// Creates an <see cref="Index"/> for the given data set with default FLANN parameters.
+        /// Loads an <see cref="Index"/> from file associated to given data set.
         /// </summary>
+        /// <param name="file">The file path.</param>
         /// <param name="data">The data set.</param>
         public static Index Load(string file, DataSet<float> data)
         {
@@ -118,6 +119,10 @@ namespace Flann
             return result;
         }
 
+        /// <summary>
+        /// Saves an <see cref="Index"/> to given file.
+        /// </summary>
+        /// <param name="file">The file path.</param>
         public void Save(string file)
         {
             NativeMethods.flann_save_index(index, file);

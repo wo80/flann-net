@@ -25,8 +25,11 @@ namespace Flann.Tests
                 // Find 2 nearest neighbours for each vector in the test set.
                 var result = index.FindNearestNeighbors(testset, 2);
 
+                dataset.Serialize("testdata.dat");
                 index.Save("testdata.flann");
             }
+
+            dataset = DataSet<float>.Deserialize("testdata.dat");
 
             using (var index = Index.Load("testdata.flann", dataset))
             {
