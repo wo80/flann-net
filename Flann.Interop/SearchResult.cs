@@ -3,48 +3,29 @@ namespace Flann
 {
     using System;
 
+    /// <summary>
+    /// Search result of a nearest-neighbours search containing the indices and distances.
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
     public class SearchResult<T> where T : struct, IEquatable<T>, IFormattable
     {
         /// <summary>
-        /// Gets the number of items in the search data set.
+        /// Gets the indices of returned nearest neighbours.
         /// </summary>
-        public int Rows { get; internal set; }
+        public DataSet<int> Indices { get; }
 
         /// <summary>
-        /// Gets the number of requested nearest neighbours.
+        /// Gets the distances to the returned nearest neighbours.
         /// </summary>
-        public int Count { get; internal set; }
+        public DataSet<T> Distances { get; }
 
         /// <summary>
-        /// Gets the raw array representation of the indices of returned nearest neighbours (row major storage).
-        /// </summary>
-        /// <remarks>
-        /// If there are K vectors in the search data set, and for each vector N nearest neighbours
-        /// were requested, then the indices of the found nearest neighbour for the i-th vector are
-        /// stored at positions <c>i * N</c> to <c>(i + 1) * N</c>. 
-        /// </remarks>
-        public DataSet<int> Indices { get; internal set; }
-
-        /// <summary>
-        /// Gets the raw array representation of the distances to the returned nearest neighbours (row major storage).
-        /// </summary>
-        /// <remarks>
-        /// If there are K vectors in the search data set, and for each vector N nearest neighbours
-        /// were requested, then the indices of the found nearest neighbour for the i-th vector are
-        /// stored at positions <c>i * N</c> to <c>(i + 1) * N</c>. 
-        /// </remarks>
-        public DataSet<T> Distances { get; internal set; }
-
-        /// <summary>
-        /// 
+        /// Initializes a new instance of the <see cref="SearchResult{T}"/> class.
         /// </summary>
         /// <param name="rows">The number of items in the search data set.</param>
         /// <param name="count">The number of requested nearest neighbours.</param>
         public SearchResult(int rows, int count)
         {
-            this.Rows = rows;
-            this.Count = count;
-
             Indices = new DataSet<int>(rows, count);
             Distances = new DataSet<T>(rows, count);
         }
