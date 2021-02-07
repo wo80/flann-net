@@ -21,6 +21,8 @@ namespace Flann
             this.columns = columns;
         }
 
+        ~Index() => Dispose(false);
+
         #region Static methods
 
         /// <summary>
@@ -30,6 +32,27 @@ namespace Flann
         public static Index Create(DataSet<float> data)
         {
             return Create(data, FlannParameters.Default());
+        }
+
+        /// <summary>
+        /// Creates an <see cref="Index"/> for the given data set.
+        /// </summary>
+        /// <param name="data">The data set.</param>
+        /// <param name="fp">The FLANN parameters.</param>
+        public static Index Create(DataSet<float> data, FlannParameters fp)
+        {
+            int rows = data.Rows;
+            int cols = data.Columns;
+
+            var flann = new Index(fp, rows, cols);
+
+            var h = GCHandle.Alloc(data.Data, GCHandleType.Pinned);
+
+            flann.index = NativeMethods.flann_build_index(h.AddrOfPinnedObject(), rows, cols, out _, ref fp);
+
+            h.Free();
+
+            return flann;
         }
 
         /// <summary>
@@ -54,29 +77,6 @@ namespace Flann
         }
 
         #endregion
-
-        /// <summary>
-        /// Creates an <see cref="Index"/> for the given data set.
-        /// </summary>
-        /// <param name="data">The data set.</param>
-        /// <param name="fp">The FLANN parameters.</param>
-        public static Index Create(DataSet<float> data, FlannParameters fp)
-        {
-            int rows = data.Rows;
-            int cols = data.Columns;
-
-            var flann = new Index(fp, rows, cols);
-
-            var h = GCHandle.Alloc(data.Data, GCHandleType.Pinned);
-
-            flann.index = NativeMethods.flann_build_index(h.AddrOfPinnedObject(), rows, cols, out _, ref fp);
-
-            h.Free();
-
-            return flann;
-        }
-
-        ~Index() => Dispose(false);
 
         /// <summary>
         /// Find <paramref name="n"/> nearest neighbours of the given vector.
@@ -109,8 +109,8 @@ namespace Flann
             var list = new List<GCHandle>();
 
             var data = InteropHelper.Pin(items.Data, list);
-            var indices = InteropHelper.Pin(result.Indices, list);
-            var distances = InteropHelper.Pin(result.Distances, list);
+            var indices = InteropHelper.Pin(result.Indices.Data, list);
+            var distances = InteropHelper.Pin(result.Distances.Data, list);
 
             NativeMethods.flann_find_nearest_neighbors_index(index, data, rows, indices, distances, n, ref fp);
 

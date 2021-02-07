@@ -5,6 +5,10 @@ namespace Flann
     using System.IO;
     using System.Runtime.InteropServices;
 
+    /// <summary>
+    /// A data set (array stored as row major order).
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
     public class DataSet<T> where T : struct, IEquatable<T>, IFormattable
     {
         private readonly int rows;
@@ -67,6 +71,42 @@ namespace Flann
         }
 
         /// <summary>
+        /// Gets the values for given row index.
+        /// </summary>
+        /// <param name="i">The row index.</param>
+        /// <returns>The row values.</returns>
+        public T[] GetRow(int i)
+        {
+            var values = new T[columns];
+
+            GetRow(i, values);
+
+            return values;
+        }
+
+        /// <summary>
+        /// Gets the values for given row index.
+        /// </summary>
+        /// <param name="i">The row index.</param>
+        /// <param name="values">The row values.</param>
+        public void GetRow(int i, T[] values)
+        {
+            if (i < 0 || i >= rows)
+            {
+                throw new ArgumentException("Row index out of range.", nameof(i));
+            }
+
+            if (values.Length < columns)
+            {
+                throw new ArgumentException("Invalid vector dimension.", nameof(values));
+            }
+
+            int offset = sizeT * columns;
+
+            Buffer.BlockCopy(data, i * offset, values, 0, offset);
+        }
+
+        /// <summary>
         /// Sets the values for given row index.
         /// </summary>
         /// <param name="i">The row index.</param>
@@ -78,7 +118,7 @@ namespace Flann
                 throw new ArgumentException("Row index out of range.", nameof(i));
             }
 
-            if (values.Length != columns)
+            if (values.Length < columns)
             {
                 throw new ArgumentException("Invalid vector dimension.", nameof(values));
             }

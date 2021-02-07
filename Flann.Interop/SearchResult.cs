@@ -23,7 +23,7 @@ namespace Flann
         /// were requested, then the indices of the found nearest neighbour for the i-th vector are
         /// stored at positions <c>i * N</c> to <c>(i + 1) * N</c>. 
         /// </remarks>
-        public int[] Indices { get; internal set; }
+        public DataSet<int> Indices { get; internal set; }
 
         /// <summary>
         /// Gets the raw array representation of the distances to the returned nearest neighbours (row major storage).
@@ -33,7 +33,7 @@ namespace Flann
         /// were requested, then the indices of the found nearest neighbour for the i-th vector are
         /// stored at positions <c>i * N</c> to <c>(i + 1) * N</c>. 
         /// </remarks>
-        public T[] Distances { get; internal set; }
+        public DataSet<T> Distances { get; internal set; }
 
         /// <summary>
         /// 
@@ -45,8 +45,8 @@ namespace Flann
             this.Rows = rows;
             this.Count = count;
 
-            Indices = new int[rows * count];
-            Distances = new T[rows * count];
+            Indices = new DataSet<int>(rows, count);
+            Distances = new DataSet<T>(rows, count);
         }
     }
 }

@@ -25,16 +25,37 @@ namespace Flann.Tests
                 // Find 2 nearest neighbours for each vector in the test set.
                 var result = index.FindNearestNeighbors(testset, 2);
 
+                var indices = result.Indices.GetRow(0);
+
+                Assert.AreEqual(0, indices[0]);
+                Assert.AreEqual(1, indices[1]);
+
+                indices = result.Indices.GetRow(1);
+
+                Assert.AreEqual(2, indices[0]);
+                Assert.AreEqual(1, indices[1]);
+
+                // Save data and index.
                 dataset.Serialize("testdata.dat");
-                index.Save("testdata.flann");
+                index.Save("testdata.idx");
             }
 
             dataset = DataSet<float>.Deserialize("testdata.dat");
 
-            using (var index = Index.Load("testdata.flann", dataset))
+            using (var index = Index.Load("testdata.idx", dataset))
             {
                 // Find 2 nearest neighbours for each vector in the test set.
                 var result = index.FindNearestNeighbors(testset, 2);
+
+                var indices = result.Indices.GetRow(0);
+
+                Assert.AreEqual(0, indices[0]);
+                Assert.AreEqual(1, indices[1]);
+
+                indices = result.Indices.GetRow(1);
+
+                Assert.AreEqual(2, indices[0]);
+                Assert.AreEqual(1, indices[1]);
             }
         }
     }

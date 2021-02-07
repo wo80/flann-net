@@ -14,27 +14,27 @@ namespace Flann
         #region search time parameters
 
         /// <summary>
-        /// How many leafs (features) to check in one search.
+        /// How many leafs (features) to check in one search (-1 for unlimited).
         /// </summary>
         public int checks;
 
         /// <summary>
-        /// eps parameter for eps-knn search.
+        /// eps parameter for eps-knn search (default: 0).
         /// </summary>
         public float eps;
 
         /// <summary>
-        /// Indicates if results returned by radius search should be sorted or not.
+        /// Indicates if results returned by radius search should be sorted or not (default: true).
         /// </summary>
         public int sorted;
 
         /// <summary>
-        /// Limits the maximum number of neighbors should be returned by radius search.
+        /// Limits the maximum number of neighbors should be returned by radius search (-1 for unlimited).
         /// </summary>
         public int maxNeighbors;
 
         /// <summary>
-        /// Number of parallel cores to use for searching.
+        /// Number of parallel cores to use for searching (0 for auto).
         /// </summary>
         public int cores;
 
@@ -95,14 +95,14 @@ namespace Flann
         /// </summary>
         public float memoryWeight;
 
-        #endregion
-
-        #region LSH parameters
-
         /// <summary>
         /// What fraction of the dataset to use for autotuning.
         /// </summary>
         public float sampleFraction;
+
+        #endregion
+
+        #region LSH parameters
 
         /// <summary>
         /// The number of hash tables to use.
@@ -140,24 +140,45 @@ namespace Flann
             var fp = new FlannParameters();
 
             fp.algorithm = FlannAlgorithm.KDTree;
+
+            // from util/params.h
+
             fp.checks = 32;
-            fp.eps = 0.0f;
+            fp.eps = 0f;
             fp.sorted = 1;
             fp.maxNeighbors = -1;
             fp.cores = 0;
-            fp.trees = 1;
-            fp.leafMaxSize = 4;
+
+            // from algorithms/kdtree_index.h
+
+            fp.trees = 4;
+
+            // from algorithms/kdtree_single_index.h
+
+            fp.leafMaxSize = 10;
+
+            // from algorithms/kmeans_index.h
+
             fp.branching = 32;
-            fp.iterations = 5;
+            fp.iterations = 11;
             fp.centersInit = FlannCentersInit.Random;
-            fp.cbIndex = 0.5f;
-            fp.targetPrecision = 0.9f;
+            fp.cbIndex = 0.2f;
+
+            // from algorithms/autotuned_index.h
+
+            fp.targetPrecision = 0.8f;
             fp.buildWeight = 0.01f;
-            fp.memoryWeight = 0.0f;
+            fp.memoryWeight = 0f;
             fp.sampleFraction = 0.1f;
+
+            // from algorithms/lsh_index.h
+
             fp.tableNumber = 12;
             fp.keySize = 20;
             fp.multiProbeLevel = 2;
+
+            // other
+
             fp.logLevel = FlannLogLevel.None;
             fp.randomSeed = -1;
 
