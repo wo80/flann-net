@@ -5,6 +5,12 @@ namespace Flann
     using System.Collections.Generic;
     using System.Runtime.InteropServices;
 
+    /// <summary>
+    /// An index for fast approximate nearest-neighbours search.
+    /// </summary>
+    /// <remarks>
+    /// At the moment, the only datatype supported is <c>float</c>.
+    /// </remarks>
     public class Index : IDisposable
     {
         private IntPtr index;
@@ -59,7 +65,7 @@ namespace Flann
         /// Loads an <see cref="Index"/> from file associated to given data set.
         /// </summary>
         /// <param name="file">The file path.</param>
-        /// <param name="data">The data set.</param>
+        /// <param name="data">The associated data set.</param>
         public static Index Load(string file, DataSet<float> data)
         {
             int rows = data.Rows;
