@@ -220,7 +220,7 @@ namespace Flann
             {
                 if (reader.ReadUInt32() != MB)
                 {
-                    throw new NotSupportedException();
+                    throw new NotSupportedException("Invalid file format.");
                 }
 
                 var rows = reader.ReadInt32();
@@ -242,7 +242,7 @@ namespace Flann
         {
             if (reader.ReadUInt32() != MAP_HINT)
             {
-                throw new NotSupportedException();
+                throw new NotSupportedException("Invalid file format (expected index map).");
             }
 
             var map = new int[rows];
@@ -259,7 +259,7 @@ namespace Flann
         {
             if (type != TypeToInt(typeof(T)))
             {
-                throw new NotSupportedException();
+                throw new NotSupportedException("Invalid data type.");
             }
 
             switch (type)
