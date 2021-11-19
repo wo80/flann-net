@@ -20,6 +20,11 @@ namespace Flann
 
         private FlannParameters fp;
 
+        /// <summary>
+        /// Gets the FLANN parameters.
+        /// </summary>
+        public ref FlannParameters Parameters => ref fp;
+
         private Index(FlannParameters fp, int rows, int columns)
         {
             this.fp = fp;

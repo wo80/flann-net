@@ -147,7 +147,10 @@ namespace Flann
             fp.eps = 0f;
             fp.sorted = 1;
             fp.maxNeighbors = -1;
-            fp.cores = 0;
+
+            // Setting cores to 1 instead of 0 (default) to avoid error if FLANN is compiled
+            // with OMP: "argument to num_threads clause must be positive".
+            fp.cores = 1;
 
             // from algorithms/kdtree_index.h
 
