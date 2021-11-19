@@ -123,7 +123,7 @@ namespace Flann
             var indices = InteropHelper.Pin(result.Indices.Data, list);
             var distances = InteropHelper.Pin(result.Distances.Data, list);
 
-            NativeMethods.flann_find_nearest_neighbors_index(index, data, rows, indices, distances, n, ref fp);
+            NativeMethods.flann_find_nearest_neighbors_index(index, data, items.Rows, indices, distances, n, ref fp);
 
             InteropHelper.Free(list);
 
