@@ -16,6 +16,8 @@ namespace Flann
         private readonly T[] data;
         private readonly int sizeT;
 
+        private int[] map;
+
         /// <summary>
         /// Gets the number of rows in the data set.
         /// </summary>
@@ -30,6 +32,17 @@ namespace Flann
         /// Gets the raw data array.
         /// </summary>
         public T[] Data => data;
+
+        /// <summary>
+        /// Gets the index map (optional).
+        /// </summary>
+        /// <remarks>
+        /// The <see cref="SearchResult{T}"/> of a nearest neighbours search on the FLANN index contains a list of
+        /// indices linearly pointing to the vector position (row) in the dataset.  Since the data might come from
+        /// a database, the index map can be used to map the linear dataset array index to a not necessarily linear
+        /// database index (row id).
+        /// </remarks>
+        public int[] IndexMap => map;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DataSet{T}"/> class.
@@ -55,17 +68,35 @@ namespace Flann
         /// </summary>
         /// <param name="rows">The number of rows in the data set.</param>
         /// <param name="columns">The number of columns in the data set (dimensionality).</param>
-        /// <param name="data">The already allocated memory (size must be at least rows * columns)</param>
+        /// <param name="data">The already allocated memory (size must be at least rows * columns).</param>
         public DataSet(int rows, int columns, T[] data)
+            : this(rows, columns, data, null)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DataSet{T}"/> class.
+        /// </summary>
+        /// <param name="rows">The number of rows in the data set.</param>
+        /// <param name="columns">The number of columns in the data set (dimensionality).</param>
+        /// <param name="data">The already allocated memory for the data (size must be at least <c>rows * columns</c>).</param>
+        /// <param name="map">Optional memory for the index map (if not null, size must be at least <c>rows</c>).</param>
+        public DataSet(int rows, int columns, T[] data, int[] map)
         {
             if (data.Length < rows * columns)
             {
-                throw new ArgumentException("Invalid array size.", nameof(data));
+                throw new ArgumentException("Invalid data array size.", nameof(data));
+            }
+
+            if (map != null && map.Length < rows)
+            {
+                throw new ArgumentException("Invalid map array size.", nameof(map));
             }
 
             this.rows = rows;
             this.columns = columns;
             this.data = data;
+            this.map = map;
 
             sizeT = Marshal.SizeOf(typeof(T));
         }
@@ -133,6 +164,8 @@ namespace Flann
         // File signature.
         private const uint MB = 0xF1A02323;
 
+        private const uint MAP_HINT = 0x11222211;
+
         /// <summary>
         /// Serialize the data set.
         /// </summary>
@@ -158,6 +191,8 @@ namespace Flann
                 writer.Write(columns);
 
                 WriteData(writer, data, TypeToInt(typeof(T)));
+
+                WriteMap(writer, map);
             }
         }
 
@@ -192,8 +227,32 @@ namespace Flann
                 var columns = reader.ReadInt32();
                 var type = reader.ReadInt32();
 
-                return ReadData(reader, (FlannDataType)type, rows, columns);
+                var data = ReadData(reader, (FlannDataType)type, rows, columns);
+
+                if (reader.BaseStream.Position < reader.BaseStream.Length)
+                {
+                    data.map = ReadMap(reader, rows);
+                }
+
+                return data;
             }
+        }
+
+        private static int[] ReadMap(BinaryReader reader, int rows)
+        {
+            if (reader.ReadUInt32() != MAP_HINT)
+            {
+                throw new NotSupportedException();
+            }
+
+            var map = new int[rows];
+
+            for (int i = 0; i < rows; i++)
+            {
+                map[i] = reader.ReadInt32();
+            }
+
+            return map;
         }
 
         private static DataSet<T> ReadData(BinaryReader reader, FlannDataType type, int rows, int columns)
@@ -246,9 +305,21 @@ namespace Flann
         {
             writer.Write((int)FlannDataType.Float32);
 
-            for (int i = 0; i < data.Length; i++)
+            for (int i = 0; i < rows * columns; i++)
             {
                 writer.Write(data[i]);
+            }
+        }
+
+        private void WriteMap(BinaryWriter writer, int[] map)
+        {
+            if (map == null) return;
+
+            writer.Write(MAP_HINT);
+
+            for (int i = 0; i < rows; i++)
+            {
+                writer.Write(map[i]);
             }
         }
 
